@@ -150,7 +150,6 @@ export interface MemoryFields {
 export interface UserFields {
   Name?: string
   Email?: string
-  'Auth Provider ID'?: string
-  'Avatar URL'?: string
+  'Password Hash'?: string
   Trips?: string[]
 }
