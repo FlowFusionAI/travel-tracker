@@ -34,12 +34,11 @@ export async function listRecords(
   tableName: TableName,
   filterByFormula?: string
 ): Promise<Record<string, unknown>[]> {
-  const records = await queue.add(() =>
-    base(tableName)
-      .select({ ...(filterByFormula ? { filterByFormula } : {}) })
-      .all()
+  const records = await queue.add(
+    () => base(tableName).select({ ...(filterByFormula ? { filterByFormula } : {}) }).all(),
+    { throwOnTimeout: true }
   )
-  return (records ?? []).map(serialise)
+  return records.map(serialise)
 }
 
 /**
@@ -49,10 +48,10 @@ export async function getRecord(
   tableName: TableName,
   recordId: string
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(() => base(tableName).find(recordId))
-  if (!record) {
-    throw new Error(`Record ${recordId} not found in ${tableName}`)
-  }
+  const record = await queue.add(
+    () => base(tableName).find(recordId),
+    { throwOnTimeout: true }
+  )
   return serialise(record as { id: string; fields: Record<string, unknown> })
 }
 
@@ -63,10 +62,10 @@ export async function createRecord(
   tableName: TableName,
   fields: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(() =>
-    base(tableName).create(fields as Airtable.FieldSet)
+  const record = await queue.add(
+    () => base(tableName).create(fields as Airtable.FieldSet),
+    { throwOnTimeout: true }
   )
-  if (!record) throw new Error('createRecord returned no record')
   return serialise(record as { id: string; fields: Record<string, unknown> })
 }
 
@@ -79,10 +78,10 @@ export async function updateRecord(
   recordId: string,
   fields: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(() =>
-    base(tableName).update(recordId, fields as Airtable.FieldSet)
+  const record = await queue.add(
+    () => base(tableName).update(recordId, fields as Airtable.FieldSet),
+    { throwOnTimeout: true }
   )
-  if (!record) throw new Error('updateRecord returned no record')
   return serialise(record as { id: string; fields: Record<string, unknown> })
 }
 
@@ -93,6 +92,9 @@ export async function deleteRecord(
   tableName: TableName,
   recordId: string
 ): Promise<{ id: string; deleted: true }> {
-  await queue.add(() => base(tableName).destroy(recordId))
-  return { id: recordId, deleted: true }
+  const deleted = await queue.add(
+    () => base(tableName).destroy(recordId),
+    { throwOnTimeout: true }
+  )
+  return { id: deleted?.id ?? recordId, deleted: true }
 }

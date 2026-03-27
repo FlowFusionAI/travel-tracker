@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
   const table = searchParams.get('table') as TableName | null
   const field = searchParams.get('field')
   const indexParam = searchParams.get('index')
-  const index = indexParam !== null ? parseInt(indexParam, 10) : 0
+  const indexRaw = indexParam !== null ? parseInt(indexParam, 10) : 0
+  const index = Number.isNaN(indexRaw) ? 0 : indexRaw
 
   if (!recordId || !table || !field) {
     return NextResponse.json(
@@ -59,6 +60,14 @@ export async function GET(req: NextRequest) {
     }
 
     const attachment = attachments[index] ?? attachments[0]
+
+    // Validate the URL is a real Airtable CDN URL before redirecting.
+    // Airtable attachment URLs are always https and hosted on airtableusercontent.com.
+    const { protocol, hostname } = new URL(attachment.url)
+    if (protocol !== 'https:' || !hostname.endsWith('airtableusercontent.com')) {
+      return NextResponse.json({ error: 'Attachment URL is not a valid Airtable CDN URL' }, { status: 502 })
+    }
+
     const response = NextResponse.redirect(attachment.url)
     // Must not cache: the Location URL expires in ~2h.
     response.headers.set('Cache-Control', 'no-store')
