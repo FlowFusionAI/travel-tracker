@@ -56,3 +56,6 @@ GOOGLE_CLIENT_SECRET      # V2: Google OAuth
 - Every new task you get you will need to ask the user if they want to implement in the same branch or create a new branch
 - After finishing the task, ask the user if they want to open a PR on github. if yes, push the changes and open a PR.
 - You can and should use subagents when you think it is best to do so.
+
+# Design
+- When designing front-end components use the /frontend-design skill

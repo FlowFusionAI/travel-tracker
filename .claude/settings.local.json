@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(lib/types/airtable.ts:*)",
+      "Bash(bash --version)",
+      "Bash(echo:*)",
+      "Bash(dir:*)",
+      "Bash(set)",
+      "Bash(command -v:*)",
+      "mcp__airtable__list_tables_for_base"
+    ]
+  }
+}
