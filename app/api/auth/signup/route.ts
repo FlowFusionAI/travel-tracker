@@ -19,17 +19,22 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const existing = await listRecords('Users', `{Email} = '${String(email)}'`)
-  if (existing.length > 0) {
-    return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
+  try {
+    const existing = await listRecords('Users', `{Email} = '${String(email)}'`)
+    if (existing.length > 0) {
+      return NextResponse.json({ error: 'Email already in use' }, { status: 409 })
+    }
+
+    const hash = await hashPassword(password as string)
+    await createRecord('Users', {
+      Name: name,
+      Email: email,
+      'Password Hash': hash,
+    })
+
+    return NextResponse.json({ success: true }, { status: 201 })
+  } catch (err) {
+    console.error('[signup]', err)
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
-
-  const hash = await hashPassword(password as string)
-  await createRecord('Users', {
-    Name: name,
-    Email: email,
-    'Password Hash': hash,
-  })
-
-  return NextResponse.json({ success: true }, { status: 201 })
 }
