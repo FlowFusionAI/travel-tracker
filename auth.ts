@@ -3,6 +3,10 @@ import Credentials from 'next-auth/providers/credentials'
 import { listRecords } from '@/lib/airtable'
 import { verifyPassword } from '@/lib/auth-helpers'
 
+if (!process.env.AUTH_SECRET) {
+  throw new Error('AUTH_SECRET is not set in .env.local')
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
@@ -13,22 +17,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
-        // Escape single quotes in email to prevent filterByFormula injection
-        const safeEmail = String(credentials.email).replace(/'/g, "\\'")
-        const users = await listRecords('Users', `{Email} = '${safeEmail}'`)
-        if (!users.length) return null
+        try {
+          const safeEmail = String(credentials.email).replace(/'/g, "\\'")
+          const users = await listRecords('Users', `{Email} = '${safeEmail}'`)
+          if (!users.length) return null
 
-        const user = users[0]
-        const isValid = await verifyPassword(
-          credentials.password as string,
-          (user['Password Hash'] as string) ?? ''
-        )
-        if (!isValid) return null
+          const user = users[0]
+          const isValid = await verifyPassword(
+            credentials.password as string,
+            (user['Password Hash'] as string) ?? ''
+          )
+          if (!isValid) return null
 
-        return {
-          id: user.id as string,
-          email: user.Email as string,
-          name: user.Name as string,
+          const email = user.Email as string | undefined
+          const name = user.Name as string | undefined
+          const id = user.id as string | undefined
+          if (!id || !email) return null
+
+          return { id, email, name: name ?? '' }
+        } catch (err) {
+          console.error('[auth] authorize error:', err)
+          return null
         }
       },
     }),

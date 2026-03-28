@@ -1,7 +1,10 @@
 import bcrypt from 'bcryptjs'
 import { SignJWT, jwtVerify } from 'jose'
 
-const RESET_SECRET = new TextEncoder().encode(process.env.RESET_TOKEN_SECRET!)
+if (!process.env.RESET_TOKEN_SECRET) {
+  throw new Error('RESET_TOKEN_SECRET is not set in .env.local')
+}
+const RESET_SECRET = new TextEncoder().encode(process.env.RESET_TOKEN_SECRET)
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
