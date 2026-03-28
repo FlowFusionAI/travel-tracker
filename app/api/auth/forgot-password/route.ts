@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       const token = await signResetToken(String(email))
       const resetLink = `${process.env.APP_URL}/reset-password?token=${token}`
 
-      await fetch(process.env.N8N_WEBHOOK_URL!, {
+      const webhookRes = await fetch(process.env.N8N_WEBHOOK_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
           resetLink,
         }),
       })
+      if (!webhookRes.ok) {
+        console.error('[forgot-password] n8n webhook failed:', webhookRes.status)
+      }
     }
   } catch (err) {
     // Log server-side only — never expose to client
