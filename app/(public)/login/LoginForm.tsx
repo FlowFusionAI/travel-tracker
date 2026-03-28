@@ -1,10 +1,11 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 export default function LoginForm() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState('')
   const resetSuccess = searchParams.get('reset') === 'success'
@@ -16,10 +17,13 @@ export default function LoginForm() {
     const result = await signIn('credentials', {
       email: (form.elements.namedItem('email') as HTMLInputElement).value,
       password: (form.elements.namedItem('password') as HTMLInputElement).value,
-      callbackUrl: '/map',
       redirect: false,
     })
-    if (result?.error) setError('Invalid email or password')
+    if (result?.error) {
+      setError('Invalid email or password')
+    } else {
+      router.push('/map')
+    }
   }
 
   return (
