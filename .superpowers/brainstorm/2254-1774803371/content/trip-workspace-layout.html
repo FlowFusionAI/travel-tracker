@@ -1,0 +1,107 @@
+<h2>Trip Workspace — Layout</h2>
+<p class="subtitle">The /trips/[id] page has 4 tabs: Mind Map, Itinerary, Memories, Info. How should the workspace be structured?</p>
+
+<div class="cards">
+
+  <!-- Option A: Hero header + horizontal tabs -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0f14;padding:10px;font-family:monospace;font-size:11px;">
+      <div style="display:flex;flex-direction:column;height:170px;border:1px solid #1e3a3a;overflow:hidden;">
+        <!-- Nav pill -->
+        <div style="display:flex;justify-content:center;padding:5px 0;border-bottom:1px solid #0d4040;background:#0a0f14;flex-shrink:0;">
+          <div style="background:#0f1a2a;border:1px solid #0d9488;padding:2px 10px;font-size:8px;color:#5eead4;">MAP &nbsp;|&nbsp; ▶ TRIPS &nbsp;|&nbsp; STATS</div>
+        </div>
+        <!-- Hero cover image -->
+        <div style="height:40px;background:linear-gradient(135deg,#0d3040,#0a2050,#1a1040);display:flex;align-items:flex-end;padding:4px 8px;gap:6px;flex-shrink:0;">
+          <div>
+            <div style="font-size:9px;color:#e2e8f0;font-weight:bold;">Valencia — Las Fallas 2025</div>
+            <div style="font-size:7px;color:#94a3b8;">🇪🇸 Spain · Mar 11–14 · ★★★★★</div>
+          </div>
+          <span style="margin-left:auto;font-size:7px;color:#0d9488;border:1px solid #0d9488;padding:1px 4px;">DONE</span>
+        </div>
+        <!-- Horizontal tab bar -->
+        <div style="display:flex;border-bottom:2px solid #0d4040;flex-shrink:0;">
+          <div style="padding:4px 10px;font-size:7px;color:#0d9488;border-bottom:2px solid #0d9488;margin-bottom:-2px;background:#0d1b2a;">▶ MIND MAP</div>
+          <div style="padding:4px 10px;font-size:7px;color:#64748b;">ITINERARY</div>
+          <div style="padding:4px 10px;font-size:7px;color:#64748b;">MEMORIES</div>
+          <div style="padding:4px 10px;font-size:7px;color:#64748b;">INFO</div>
+        </div>
+        <!-- Tab content -->
+        <div style="flex:1;background:#0a0f14;display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:8px;color:#334155;text-align:center;">[ React Flow canvas /<br>tab content fills here ]</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Hero Header + Horizontal Tabs</h3>
+      <p>Cover image strip at top with trip name/stats. Horizontal tab bar below. Tab content fills remaining height. Familiar pattern — same as most workspace apps. Works well for Mind Map (full canvas area).</p>
+    </div>
+  </div>
+
+  <!-- Option B: Full-screen, tabs on left side -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0f14;padding:10px;font-family:monospace;font-size:11px;">
+      <div style="display:flex;flex-direction:column;height:170px;border:1px solid #1e3a3a;overflow:hidden;">
+        <!-- Nav pill -->
+        <div style="display:flex;justify-content:center;padding:5px 0;border-bottom:1px solid #0d4040;background:#0a0f14;flex-shrink:0;">
+          <div style="background:#0f1a2a;border:1px solid #0d9488;padding:2px 10px;font-size:8px;color:#5eead4;">MAP &nbsp;|&nbsp; ▶ TRIPS &nbsp;|&nbsp; STATS</div>
+        </div>
+        <div style="display:flex;flex:1;overflow:hidden;">
+          <!-- Left: vertical tabs -->
+          <div style="width:65px;background:#0d1420;border-right:1px solid #0d3030;display:flex;flex-direction:column;padding:6px 0;">
+            <!-- Trip name mini-header -->
+            <div style="padding:4px 6px;border-bottom:1px solid #0d3030;margin-bottom:4px;">
+              <div style="font-size:6px;color:#0d9488;">VALENCIA</div>
+              <div style="font-size:5px;color:#64748b;">LAS FALLAS</div>
+            </div>
+            <div style="padding:5px 6px;font-size:7px;color:#0d9488;border-left:2px solid #0d9488;background:#0d2030;">MAP</div>
+            <div style="padding:5px 6px;font-size:7px;color:#64748b;">ITIN.</div>
+            <div style="padding:5px 6px;font-size:7px;color:#64748b;">MEM.</div>
+            <div style="padding:5px 6px;font-size:7px;color:#64748b;">INFO</div>
+          </div>
+          <!-- Right: content -->
+          <div style="flex:1;background:#0a0f14;display:flex;align-items:center;justify-content:center;">
+            <div style="font-size:8px;color:#334155;text-align:center;">[ full-height canvas ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Vertical Tabs Left, Full Canvas Right</h3>
+      <p>Compact vertical tab strip on the left (like VS Code). Trip name shown in the strip. Content fills full height — ideal for React Flow canvas. Less familiar, saves vertical space.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Compact top bar (trip name + tabs merged), no hero -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0f14;padding:10px;font-family:monospace;font-size:11px;">
+      <div style="display:flex;flex-direction:column;height:170px;border:1px solid #1e3a3a;overflow:hidden;">
+        <!-- Nav pill -->
+        <div style="display:flex;justify-content:center;padding:5px 0;border-bottom:1px solid #0d4040;background:#0a0f14;flex-shrink:0;">
+          <div style="background:#0f1a2a;border:1px solid #0d9488;padding:2px 10px;font-size:8px;color:#5eead4;">MAP &nbsp;|&nbsp; ▶ TRIPS &nbsp;|&nbsp; STATS</div>
+        </div>
+        <!-- Single combined bar: ← back | trip name | tabs on right -->
+        <div style="background:#0d1420;border-bottom:1px solid #0d3030;padding:0 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;height:28px;">
+          <span style="font-size:7px;color:#64748b;">← TRIPS</span>
+          <span style="font-size:7px;color:#0d9488;font-weight:bold;">VALENCIA — LAS FALLAS 2025</span>
+          <span style="font-size:6px;color:#64748b;">🇪🇸 · DONE · ★★★★★</span>
+          <div style="margin-left:auto;display:flex;border:1px solid #0d3030;">
+            <div style="padding:4px 8px;font-size:7px;color:#0d9488;background:#0d2030;border-right:1px solid #0d3030;">MAP</div>
+            <div style="padding:4px 8px;font-size:7px;color:#64748b;border-right:1px solid #0d3030;">ITIN</div>
+            <div style="padding:4px 8px;font-size:7px;color:#64748b;border-right:1px solid #0d3030;">MEM</div>
+            <div style="padding:4px 8px;font-size:7px;color:#64748b;">INFO</div>
+          </div>
+        </div>
+        <!-- Full-height content -->
+        <div style="flex:1;background:#0a0f14;display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:8px;color:#334155;text-align:center;">[ maximum canvas space ]</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Single Bar (Name + Tabs), Maximum Canvas</h3>
+      <p>Everything in one slim bar: back link, trip name, inline tab switcher on the right. No hero image — maximum space for the canvas. Clean, efficient. Info tab is where you'd see cover image/details.</p>
+    </div>
+  </div>
+
+</div>
