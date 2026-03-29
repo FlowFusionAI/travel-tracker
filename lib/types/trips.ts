@@ -64,5 +64,5 @@ export interface TripFiltersState {
   year: string
   tripType: TripType | ''
   category: TripCategory[]
-  sort: 'date_desc' | 'date_asc' | 'rating_desc' | 'modified_desc'
+  sort: 'date_desc' | 'date_asc' | 'rating_desc'
 }

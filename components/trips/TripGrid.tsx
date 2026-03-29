@@ -35,7 +35,6 @@ function applyFilters(trips: TripListItem[], f: TripFiltersState): TripListItem[
     if (f.sort === 'rating_desc') {
       return (b.rating ?? 0) - (a.rating ?? 0)
     }
-    // modified_desc — no modified field in view model; fall back to date_desc
     return (b.startDate ?? '').localeCompare(a.startDate ?? '')
   })
 

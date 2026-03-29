@@ -34,7 +34,6 @@ const SORT_OPTIONS = [
   { value: 'date_desc', label: 'DATE ↓' },
   { value: 'date_asc', label: 'DATE ↑' },
   { value: 'rating_desc', label: 'RATING ↓' },
-  { value: 'modified_desc', label: 'MODIFIED' },
 ] as const
 
 const pixelFont = { fontFamily: 'var(--font-pixel)' }

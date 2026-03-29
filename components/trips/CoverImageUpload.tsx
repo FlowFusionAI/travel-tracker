@@ -23,9 +23,10 @@ export default function CoverImageUpload({
   const [errorMsg, setErrorMsg] = useState('')
   const [localPreview, setLocalPreview] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const cacheBuster = useRef(Date.now())
 
   const imageUrl = hasExisting
-    ? `/api/images?recordId=${recordId}&table=Trips&field=Cover+Image&t=${Date.now()}`
+    ? `/api/images?recordId=${recordId}&table=Trips&field=Cover+Image&t=${cacheBuster.current}`
     : null
 
   const handleFile = useCallback(async (file: File) => {
@@ -54,7 +55,10 @@ export default function CoverImageUpload({
 
     // Show local preview immediately after compression
     const preview = URL.createObjectURL(compressed)
-    setLocalPreview(preview)
+    setLocalPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return preview
+    })
     setStatus('uploading')
 
     const formData = new FormData()
@@ -69,6 +73,7 @@ export default function CoverImageUpload({
         const data = await res.json()
         throw new Error(data.error ?? 'Upload failed')
       }
+      cacheBuster.current = Date.now()
       setStatus('idle')
       onUploadComplete()
     } catch (err) {

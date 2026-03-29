@@ -41,6 +41,19 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Verify the authenticated user owns this trip
+  const { getRecord } = await import('@/lib/airtable')
+  let tripRecord: Record<string, unknown>
+  try {
+    tripRecord = await getRecord('Trips', recordId)
+  } catch {
+    return NextResponse.json({ error: 'Record not found' }, { status: 404 })
+  }
+  const tripUser = tripRecord['User'] as string[] | undefined
+  if (!Array.isArray(tripUser) || !tripUser.includes(session.user.id)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   let formData: FormData
   try {
     formData = await req.formData()
