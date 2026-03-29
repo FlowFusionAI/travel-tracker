@@ -123,7 +123,7 @@ export default function TripFilters({
         >
           <option value="">ALL COUNTRIES</option>
           {countryOptions.map(c => (
-            <option key={c.id} value={c.id}>{c.name.toUpperCase()}</option>
+            <option key={c.id} value={c.id}>{(c.name ?? '').toUpperCase()}</option>
           ))}
         </select>
 

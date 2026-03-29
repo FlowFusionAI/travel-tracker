@@ -31,8 +31,6 @@ AIRTABLE_BASE_ID          # Target Airtable base ID
 DEFAULT_USER_ID           # V1 only: Airtable record ID for single user; replaced by session in V2
 NEXTAUTH_SECRET           # V2: random 32-char secret
 NEXTAUTH_URL              # V2: app URL e.g. https://travel.vercel.app
-GOOGLE_CLIENT_ID          # V2: Google OAuth
-GOOGLE_CLIENT_SECRET      # V2: Google OAuth
 ```
 
 ## Architecture
@@ -66,9 +64,9 @@ GOOGLE_CLIENT_SECRET      # V2: Google OAuth
 - You can and should use subagents when you think it is best to do so.
 
 Follow this skill chain for each feature:
-1. `/brainstorm` — explore requirements and design decisions before any code
-2. `/write-plan` — write implementation plan to `docs/superpowers/plans/`
-3. Ask: same branch or new branch?
+1. Ask: same branch or new branch?
+2. `/brainstorm` — explore requirements and design decisions before any code
+3. `/write-plan` — write implementation plan to `docs/superpowers/plans/`
 4. `/frontend-design` — before building any UI component
 5. `/subagent-driven-development` or `/execute-plan` — implement
 6. `/request-code-review` — verify before finishing
