@@ -52,7 +52,7 @@ export default async function TripsPage() {
   const countryOptions: CountryOption[] = countries
     .filter(c => usedCountryIds.has(c.id))
     .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] }))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
 
   return (
     <div className="h-full flex flex-col bg-[#0a0f14] pt-[52px]">
