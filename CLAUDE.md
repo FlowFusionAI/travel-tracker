@@ -57,5 +57,27 @@ GOOGLE_CLIENT_SECRET      # V2: Google OAuth
 - After finishing the task, ask the user if they want to open a PR on github. if yes, push the changes and open a PR.
 - You can and should use subagents when you think it is best to do so.
 
-# Design
-- When designing front-end components use the /frontend-design skill
+Follow this skill chain for each feature:
+1. `/brainstorm` — explore requirements and design decisions before any code
+2. `/write-plan` — write implementation plan to `docs/superpowers/plans/`
+3. Ask: same branch or new branch?
+4. `/frontend-design` — before building any UI component
+5. `/subagent-driven-development` or `/execute-plan` — implement
+6. `/request-code-review` — verify before finishing
+7. `/finish-branch` — wrap up
+
+## Design System
+
+Aesthetic: clean minimalist with generous whitespace + pixel/game-inspired UI.
+
+Key traits:
+- Lots of breathing room — padding and gaps larger than default
+- Pixel-art style details: hard edges, pixelated box-shadows (offset, no blur), sprite-style icons
+- Retro game font: `Press Start 2P` (Google Fonts) for headings and labels — use sparingly
+- Subtle CSS animations: pixel transitions, slight scanline texture, sprite-sheet style movements
+- Colour palette: dark background (#0a0a0f), muted slate tones, teal accent (#2dd4bf), warm white text
+- No rounded corners — sharp edges (border-radius: 0) or 2px max
+- Cards and panels feel like JRPG inventory screens — bordered boxes, inner glow, stat-grid layouts
+- Interactive elements have a pixel-push effect on click (translateY 2px, shadow shrinks)
+
+When designing front-end components always use the /frontend-design skill before writing any JSX.
