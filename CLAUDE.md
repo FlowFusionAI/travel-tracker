@@ -16,6 +16,14 @@
 - Cache responses where possible: `{ next: { revalidate: 3600 } }` for country/city data; `{ cache: 'no-store' }` for trip data
 - **Attachment URLs expire (~2h)** — never use Airtable CDN URLs in components; always use the `/api/images` proxy instead
 
+## Airtable MCP — Required for Backend Changes
+When making any change that touches Airtable data access (new queries, filterByFormula changes, new fields, type definitions, API route updates), you MUST use the Airtable MCP first:
+1. Call `mcp__airtable__search_bases` to locate the travel-tracker base
+2. Call `mcp__airtable__list_tables_for_base` to confirm table IDs and field names
+3. Call `mcp__airtable__get_table_schema` for any table whose fields you are querying or writing — especially before filtering on singleSelect/multipleSelect fields (need choice IDs)
+
+This prevents mismatches between code and the live schema (wrong field names, missing fields, incorrect choice values).
+
 ## Environment Variables
 ```
 AIRTABLE_API_KEY          # Airtable personal access token
