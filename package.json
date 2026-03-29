@@ -11,6 +11,7 @@
   "dependencies": {
     "airtable": "^0.12.2",
     "bcryptjs": "^3.0.3",
+    "browser-image-compression": "^2.0.2",
     "jose": "^6.2.2",
     "leaflet": "^1.9.4",
     "next": "16.2.1",
