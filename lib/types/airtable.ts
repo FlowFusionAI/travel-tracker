@@ -77,7 +77,7 @@ export interface TripFields {
   Category?: TripCategory[]
   Status: TripStatus
   'Cover Image'?: AirtableAttachment[]
-  Summary?: string
+  summary?: string
   Rating?: number
   'Budget Spent'?: number
   Nodes?: string[]
