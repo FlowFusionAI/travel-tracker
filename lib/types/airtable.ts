@@ -1,8 +1,7 @@
 /**
  * Type definitions for all Airtable tables.
  *
- * Field names match Airtable exactly (including spaces and capitalisation)
- * so these types can be used directly with the SDK's raw FieldSet.
+ * Field names match Airtable exactly (including spaces and capitalisation).
  *
  * IMPORTANT: AirtableAttachment.url is a signed URL that expires in ~2 hours.
  * Never render it directly in a component. Always go via /api/images.
@@ -51,21 +50,22 @@ export type Continent =
   | 'South America'
   | 'Oceania'
   | 'Antarctica'
+
+// Matches actual Airtable singleSelect choice values (lowercase, hyphenated)
 export type NodeType =
-  | 'Activity'
-  | 'Place'
-  | 'Food'
-  | 'Transport'
-  | 'Accommodation'
-  | 'Note'
-  | 'Day Header'
-  | 'Thought'
+  | 'activity'
+  | 'place'
+  | 'food'
+  | 'transport'
+  | 'accommodation'
+  | 'note'
+  | 'day-header'
+  | 'thought'
+
 export type EdgeStyle = 'Solid' | 'Dashed' | 'Dotted'
 export type MemoryTag = 'Food' | 'Funny' | 'Scenic' | 'People' | 'Mishap' | 'Highlight'
 
 // ─── Table field shapes ───────────────────────────────────────────────────────
-// These describe the raw fields returned by the Airtable SDK.
-// Optional fields may be absent if not set in Airtable.
 
 export interface TripFields {
   Name: string
@@ -80,15 +80,16 @@ export interface TripFields {
   summary?: string
   Rating?: number
   'Budget Spent'?: number
-  Nodes?: string[]
+  'Mind Map Nodes'?: string[]
+  'Node Connections'?: string[]
   Memories?: string[]
   User?: string[]
 }
 
 export interface CountryFields {
-  Name: string
-  'ISO Code': string
-  Continent?: Continent
+  name: string
+  'ISO code': string
+  continent?: Continent
   'Flag Emoji'?: string
   'Times Visited': number
   'First Visited'?: string
@@ -97,53 +98,55 @@ export interface CountryFields {
 }
 
 export interface CityFields {
-  Name: string
-  Country?: string[]
-  Latitude?: number
-  Longitude?: number
+  name: string
+  country?: string[]
+  'coordinates (lat)'?: number
+  'coordinates (lng)'?: number
   'Times Visited': number
-  Trips?: string[]
-  Rating?: number
+  'linked trips'?: string[]
+  rating?: number
   Notes?: string
   Memories?: string[]
 }
 
+// Field names match Airtable Mind Map Nodes table exactly
 export interface MindMapNodeFields {
-  Title: string
-  Content?: string
-  Trip?: string[]
-  'Node Type'?: NodeType
-  'Position X'?: number
-  'Position Y'?: number
+  title: string
+  content?: string
+  trip?: string[]
+  'node type'?: NodeType
+  'position X'?: number
+  'position Y'?: number
   Width?: number
   Height?: number
-  Colour?: string
-  Images?: AirtableAttachment[]
-  Links?: string       // JSON: Array<{ url: string; label: string }>
+  'colour/category'?: string
+  images?: AirtableAttachment[]
+  links?: string             // JSON: Array<{ url: string; label: string }>
   'Day Number'?: number
   Time?: string
-  Checklist?: string   // JSON: Array<{ text: string; checked: boolean }>
-  'Connections Out'?: string[]
-  'Connections In'?: string[]
+  Checklist?: string         // JSON: Array<{ text: string; checked: boolean }>
+  'Node Connections (source node)'?: string[]
+  'Node Connections (target node)'?: string[]
   User?: string[]
 }
 
+// Field names match Airtable Node Connections table exactly
 export interface NodeConnectionFields {
-  'Source Node'?: string[]
-  'Target Node'?: string[]
-  Trip?: string[]
-  Label?: string
+  label?: string
+  'source node'?: string[]
+  'target node'?: string[]
+  trip?: string[]
   Style?: EdgeStyle
   Colour?: string
 }
 
 export interface MemoryFields {
-  Text?: string
-  Photos?: AirtableAttachment[]
-  Trip?: string[]
-  City?: string[]
-  Date?: string
-  Tags?: MemoryTag[]
+  text?: string
+  photos?: AirtableAttachment[]
+  trip?: string[]
+  city?: string[]
+  date?: string
+  tags?: MemoryTag[]
   User?: string[]
 }
 

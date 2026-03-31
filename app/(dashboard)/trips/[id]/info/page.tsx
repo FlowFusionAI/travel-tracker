@@ -49,7 +49,7 @@ export default async function TripInfoPage({ params }: PageParams) {
     countries: (trip.Country ?? [])
       .map(cid => countryMap.get(cid))
       .filter((c): c is { id: string } & CountryFields => c !== undefined)
-      .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] })),
+      .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] })),
     countryIds: trip.Country ?? [],
     cityIds: trip.Cities ?? [],
     tripType: trip['Trip Type'],
@@ -59,13 +59,13 @@ export default async function TripInfoPage({ params }: PageParams) {
   }
 
   const countryOptions: CountryOption[] = countries
-    .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] }))
+    .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const cityOptions: CityOption[] = cities.map(c => ({
     id: c.id,
-    name: c.Name,
-    countryIds: c.Country ?? [],
+    name: c.name,
+    countryIds: c.country ?? [],
   }))
 
   return (

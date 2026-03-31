@@ -41,7 +41,7 @@ export default async function TripsPage() {
     countries: (t.Country ?? [])
       .map(cid => countryMap.get(cid))
       .filter((c): c is { id: string } & CountryFields => c !== undefined)
-      .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] })),
+      .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] })),
     tripType: t['Trip Type'],
     category: t.Category,
     summary: t.summary,
@@ -51,7 +51,7 @@ export default async function TripsPage() {
   const usedCountryIds = new Set(trips.flatMap(t => t.Country ?? []))
   const countryOptions: CountryOption[] = countries
     .filter(c => usedCountryIds.has(c.id))
-    .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] }))
+    .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] }))
     .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
 
   return (
