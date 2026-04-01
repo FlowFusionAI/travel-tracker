@@ -6,8 +6,8 @@ const VALID_TABLES: readonly TableName[] = [
   'Trips',
   'Countries',
   'Cities',
-  'MindMapNodes',
-  'NodeConnections',
+  'Mind Map Nodes',
+  'Node Connections',
   'Memories',
   'Users',
 ]

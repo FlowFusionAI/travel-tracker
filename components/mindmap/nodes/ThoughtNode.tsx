@@ -1,9 +1,9 @@
 // components/mindmap/nodes/ThoughtNode.tsx
 'use client'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { MindMapNodeData } from '@/lib/types/mindmap'
+import type { MindMapNode, MindMapNodeData } from '@/lib/types/mindmap'
 
-export default function ThoughtNode({ data, selected }: NodeProps<MindMapNodeData>) {
+export default function ThoughtNode({ data, selected }: NodeProps<MindMapNode>) {
   const borderColor = '#e2e8f0'
   const preview = getPreview(data)
 

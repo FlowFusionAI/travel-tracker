@@ -1,9 +1,9 @@
 // components/mindmap/nodes/FoodNode.tsx
 'use client'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { MindMapNodeData } from '@/lib/types/mindmap'
+import type { MindMapNode, MindMapNodeData } from '@/lib/types/mindmap'
 
-export default function FoodNode({ data, selected }: NodeProps<MindMapNodeData>) {
+export default function FoodNode({ data, selected }: NodeProps<MindMapNode>) {
   const borderColor = '#f97316'
   const preview = getPreview(data)
 

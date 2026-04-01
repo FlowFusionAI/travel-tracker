@@ -213,7 +213,7 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
 
   // ── Right-click on canvas ──────────────────────────────────────────────────
 
-  const onPaneContextMenu = useCallback((e: React.MouseEvent) => {
+  const onPaneContextMenu = useCallback((e: MouseEvent | React.MouseEvent) => {
     e.preventDefault()
     const bounds = reactFlowRef.current?.getBoundingClientRect()
     if (!bounds) return

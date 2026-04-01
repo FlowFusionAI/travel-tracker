@@ -1,9 +1,9 @@
 // components/mindmap/nodes/NoteNode.tsx
 'use client'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { MindMapNodeData } from '@/lib/types/mindmap'
+import type { MindMapNode, MindMapNodeData } from '@/lib/types/mindmap'
 
-export default function NoteNode({ data, selected }: NodeProps<MindMapNodeData>) {
+export default function NoteNode({ data, selected }: NodeProps<MindMapNode>) {
   const borderColor = '#eab308'
   const preview = getPreview(data)
 

@@ -1,9 +1,9 @@
 // components/mindmap/nodes/DayHeaderNode.tsx
 'use client'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { MindMapNodeData } from '@/lib/types/mindmap'
+import type { MindMapNode, MindMapNodeData } from '@/lib/types/mindmap'
 
-export default function DayHeaderNode({ data, selected }: NodeProps<MindMapNodeData>) {
+export default function DayHeaderNode({ data, selected }: NodeProps<MindMapNode>) {
   return (
     <div
       className="relative bg-[#0a0f14]"
