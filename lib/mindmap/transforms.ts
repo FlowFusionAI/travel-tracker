@@ -52,31 +52,33 @@ export function airtableRecordToEdge(record: Record<string, unknown>): MindMapEd
 // ── React Flow → Airtable ────────────────────────────────────────────────────
 
 export function nodeToAirtableFields(node: MindMapNode): Record<string, unknown> {
-  return {
+  // Only include fields with real values — Airtable SDK rejects null for most field types
+  const fields: Record<string, unknown> = {
     title: node.data.title,
     'node type': node.data.nodeType,
-    content: node.data.content ?? null,
     'position X': node.position.x,
     'position Y': node.position.y,
-    'colour/category': node.data.colour ?? null,
-    links: node.data.links?.length ? JSON.stringify(node.data.links) : null,
-    Checklist: node.data.checklist?.length ? JSON.stringify(node.data.checklist) : null,
-    'Day Number': node.data.dayNumber ?? null,
-    Time: node.data.time ?? null,
-    Width: (node.data as Record<string, unknown>).width ?? null,
-    Height: (node.data as Record<string, unknown>).height ?? null,
   }
+  if (node.data.content) fields.content = node.data.content
+  if (node.data.colour) fields['colour/category'] = node.data.colour
+  if (node.data.links?.length) fields.links = JSON.stringify(node.data.links)
+  if (node.data.checklist?.length) fields.Checklist = JSON.stringify(node.data.checklist)
+  if (node.data.dayNumber != null) fields['Day Number'] = node.data.dayNumber
+  if (node.data.time) fields.Time = node.data.time
+  return fields
 }
 
 export function edgeToAirtableFields(edge: MindMapEdge, tripId: string): Record<string, unknown> {
-  return {
-    label: (edge.label as string | undefined) ?? null,
+  const fields: Record<string, unknown> = {
     'source node': [edge.source],
     'target node': [edge.target],
     trip: [tripId],
-    Style: edge.data?.style ?? null,
-    Colour: edge.data?.colour ?? null,
   }
+  const label = edge.label as string | undefined
+  if (label) fields.label = label
+  if (edge.data?.style) fields.Style = edge.data.style
+  if (edge.data?.colour) fields.Colour = edge.data.colour
+  return fields
 }
 
 // ── Snapshot + diff ──────────────────────────────────────────────────────────

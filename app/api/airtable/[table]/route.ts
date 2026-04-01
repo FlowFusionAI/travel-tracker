@@ -67,6 +67,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(record, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
+    console.error(`[POST /api/airtable/${table}]`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -92,6 +93,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(record)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
+    console.error(`[PATCH /api/airtable/${table}]`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
