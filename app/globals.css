@@ -25,6 +25,22 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
+/* ─── Mind Map animations ───────────────────────────────────────────────────── */
+
+@keyframes fade-out {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-fade-out {
+  animation: fade-out 2s ease-out forwards;
+}
+
+@keyframes pixel-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 /* ─── JRPG Pixel Panel ──────────────────────────────────────────────────────── */
 
 .pixel-panel {

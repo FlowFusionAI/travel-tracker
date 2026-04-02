@@ -54,13 +54,13 @@ export default async function MapPage() {
 
   // Build CountryMapData — only include countries with a valid ISO code
   const countryData: CountryMapData[] = countries
-    .filter((c) => c['ISO Code'] && c['ISO Code'] !== '-99')
+    .filter((c) => c['ISO code'] && c['ISO code'] !== '-99')
     .map((c) => ({
       id: c.id,
-      name: c.Name,
-      isoCode: c['ISO Code'],
+      name: c.name,
+      isoCode: c['ISO code'],
       flagEmoji: c['Flag Emoji'],
-      continent: c.Continent,
+      continent: c.continent,
       status: deriveCountryStatus(c.id, trips),
       timesVisited: c['Times Visited'] ?? 0,
       firstVisited: c['First Visited'],
@@ -71,15 +71,15 @@ export default async function MapPage() {
 
   // Build CityMapData — only cities that have coordinates
   const cityData: CityMapData[] = cities
-    .filter((c) => c.Latitude != null && c.Longitude != null)
+    .filter((c) => c['coordinates (lat)'] != null && c['coordinates (lng)'] != null)
     .map((c) => ({
       id: c.id,
-      name: c.Name,
-      latitude: c.Latitude!,
-      longitude: c.Longitude!,
-      rating: c.Rating,
+      name: c.name,
+      latitude: c['coordinates (lat)']!,
+      longitude: c['coordinates (lng)']!,
+      rating: c.rating,
       timesVisited: c['Times Visited'] ?? 0,
-      trips: (c.Trips ?? [])
+      trips: (c['linked trips'] ?? [])
         .map((tid) => tripSummaryMap.get(tid))
         .filter((t): t is TripSummary => t !== undefined),
     }))

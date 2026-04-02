@@ -50,7 +50,7 @@ export default async function TripWorkspaceLayout({
     countries: (trip.Country ?? [])
       .map(cid => countryMap.get(cid))
       .filter((c): c is { id: string } & CountryFields => c !== undefined)
-      .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] })),
+      .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] })),
     countryIds: trip.Country ?? [],
     cityIds: trip.Cities ?? [],
     tripType: trip['Trip Type'],

@@ -20,13 +20,13 @@ export default async function NewTripPage() {
   const cities = rawCities as unknown as Array<{ id: string } & CityFields>
 
   const countryOptions: CountryOption[] = countries
-    .map(c => ({ id: c.id, name: c.Name, flagEmoji: c['Flag Emoji'] }))
+    .map(c => ({ id: c.id, name: c.name, flagEmoji: c['Flag Emoji'] }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const cityOptions: CityOption[] = cities.map(c => ({
     id: c.id,
-    name: c.Name,
-    countryIds: c.Country ?? [],
+    name: c.name,
+    countryIds: c.country ?? [],
   }))
 
   return (

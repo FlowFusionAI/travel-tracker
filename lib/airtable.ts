@@ -26,6 +26,27 @@ function serialise(record: {
 }
 
 /**
+ * Extract and log full error details from an Airtable SDK error.
+ * Airtable SDK errors carry statusCode, error (type code), and message
+ * alongside the standard Error properties.
+ */
+function logAirtableError(
+  op: string,
+  table: TableName,
+  err: unknown,
+  ctx?: Record<string, unknown>
+): void {
+  const details: Record<string, unknown> = { op, table, ...ctx }
+  if (err && typeof err === 'object') {
+    const e = err as Record<string, unknown>
+    if ('statusCode' in e) details.statusCode = e.statusCode
+    if ('error' in e) details.airtableError = e.error
+    if ('message' in e) details.message = e.message
+  }
+  console.error('[airtable]', JSON.stringify(details), err)
+}
+
+/**
  * Fetch all records from a table, optionally filtered.
  * filterByFormula follows Airtable formula syntax, e.g.
  *   AND({Status}="Completed", {User}="recXXXXXXXXXXXXXX")
@@ -34,11 +55,16 @@ export async function listRecords(
   tableName: TableName,
   filterByFormula?: string
 ): Promise<Record<string, unknown>[]> {
-  const records = await queue.add(
-    () => base(tableName).select({ ...(filterByFormula ? { filterByFormula } : {}) }).all(),
-    { throwOnTimeout: true }
-  )
-  return records.map(serialise)
+  try {
+    const records = await queue.add(
+      () => base(tableName).select({ ...(filterByFormula ? { filterByFormula } : {}) }).all(),
+      { throwOnTimeout: true }
+    )
+    return records.map(serialise)
+  } catch (err) {
+    logAirtableError('listRecords', tableName, err, { filterByFormula })
+    throw err
+  }
 }
 
 /**
@@ -48,11 +74,16 @@ export async function getRecord(
   tableName: TableName,
   recordId: string
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(
-    () => base(tableName).find(recordId),
-    { throwOnTimeout: true }
-  )
-  return serialise(record as { id: string; fields: Record<string, unknown> })
+  try {
+    const record = await queue.add(
+      () => base(tableName).find(recordId),
+      { throwOnTimeout: true }
+    )
+    return serialise(record as { id: string; fields: Record<string, unknown> })
+  } catch (err) {
+    logAirtableError('getRecord', tableName, err, { recordId })
+    throw err
+  }
 }
 
 /**
@@ -62,11 +93,16 @@ export async function createRecord(
   tableName: TableName,
   fields: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(
-    () => base(tableName).create(fields as Airtable.FieldSet),
-    { throwOnTimeout: true }
-  )
-  return serialise(record as { id: string; fields: Record<string, unknown> })
+  try {
+    const record = await queue.add(
+      () => base(tableName).create(fields as Airtable.FieldSet),
+      { throwOnTimeout: true }
+    )
+    return serialise(record as { id: string; fields: Record<string, unknown> })
+  } catch (err) {
+    logAirtableError('createRecord', tableName, err, { fieldKeys: Object.keys(fields) })
+    throw err
+  }
 }
 
 /**
@@ -78,11 +114,16 @@ export async function updateRecord(
   recordId: string,
   fields: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const record = await queue.add(
-    () => base(tableName).update(recordId, fields as Airtable.FieldSet),
-    { throwOnTimeout: true }
-  )
-  return serialise(record as { id: string; fields: Record<string, unknown> })
+  try {
+    const record = await queue.add(
+      () => base(tableName).update(recordId, fields as Airtable.FieldSet),
+      { throwOnTimeout: true }
+    )
+    return serialise(record as { id: string; fields: Record<string, unknown> })
+  } catch (err) {
+    logAirtableError('updateRecord', tableName, err, { recordId, fieldKeys: Object.keys(fields) })
+    throw err
+  }
 }
 
 /**
@@ -92,9 +133,14 @@ export async function deleteRecord(
   tableName: TableName,
   recordId: string
 ): Promise<{ id: string; deleted: true }> {
-  const deleted = await queue.add(
-    () => base(tableName).destroy(recordId),
-    { throwOnTimeout: true }
-  )
-  return { id: deleted?.id ?? recordId, deleted: true }
+  try {
+    const deleted = await queue.add(
+      () => base(tableName).destroy(recordId),
+      { throwOnTimeout: true }
+    )
+    return { id: deleted?.id ?? recordId, deleted: true }
+  } catch (err) {
+    logAirtableError('deleteRecord', tableName, err, { recordId })
+    throw err
+  }
 }
