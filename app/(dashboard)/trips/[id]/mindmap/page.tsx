@@ -10,10 +10,18 @@ export default async function MindMapPage({ params }: PageParams) {
 
   // Fetch nodes and connections for this trip in parallel
   // Ownership already verified by [id]/layout.tsx
-  const [rawNodes, rawEdges] = await Promise.all([
-    listRecords('Mind Map Nodes', `FIND("${tripId}", ARRAYJOIN({trip})) > 0`),
-    listRecords('Node Connections', `FIND("${tripId}", ARRAYJOIN({trip})) > 0`),
-  ])
+  let rawNodes: Record<string, unknown>[] = []
+  let rawEdges: Record<string, unknown>[] = []
+
+  try {
+    ;[rawNodes, rawEdges] = await Promise.all([
+      listRecords('Mind Map Nodes', `FIND("${tripId}", ARRAYJOIN({trip})) > 0`),
+      listRecords('Node Connections', `FIND("${tripId}", ARRAYJOIN({trip})) > 0`),
+    ])
+  } catch (err) {
+    console.error('[MindMapPage] failed to load trip data for tripId:', tripId, err)
+    // Render canvas with empty state rather than crashing the whole page
+  }
 
   const initialNodes = rawNodes.map(airtableRecordToNode)
   const initialEdges = rawEdges.map(airtableRecordToEdge)

@@ -1,6 +1,6 @@
 // components/mindmap/MindMapCanvas.tsx
 'use client'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -65,6 +65,15 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
   const snapshotRef = useRef<SavedSnapshot>(buildInitialSnapshot(initialNodes, initialEdges))
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reactFlowRef = useRef<HTMLDivElement>(null)
+  const savingRef = useRef(false)
+  const pendingRef = useRef(false)
+  const doSaveCallbackRef = useRef<() => void>(() => {})
+  // Prevent saves during React Flow's initial mount/fitView stabilisation
+  const readyToSaveRef = useRef(false)
+  // Refs always holding latest nodes/edges so doSave can read them without
+  // going through setNodes(cb), which React Strict Mode calls twice.
+  const nodesRef = useRef<MindMapNode[]>(initialNodes)
+  const edgesRef = useRef<MindMapEdge[]>(initialEdges)
 
   // ── Auto-save ──────────────────────────────────────────────────────────────
   // IMPORTANT: performSave must be declared before doSave (closure ordering).
@@ -73,6 +82,18 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
     try {
       const nodeDiff = computeNodeDiff(snapshotRef.current, currentNodes)
       const edgeDiff = computeEdgeDiff(snapshotRef.current, currentEdges)
+
+      // Skip if nothing changed
+      if (!nodeDiff.created.length && !nodeDiff.updated.length && !nodeDiff.deleted.length &&
+          !edgeDiff.created.length && !edgeDiff.updated.length && !edgeDiff.deleted.length) {
+        setSaveState('clean')
+        return
+      }
+
+      console.log('[MindMap] save diff:', {
+        nodes: { created: nodeDiff.created.map(n => n.id), updated: nodeDiff.updated.map(n => n.data.airtableId), deleted: nodeDiff.deleted },
+        edges: { created: edgeDiff.created.map(e => e.id), updated: edgeDiff.updated.map(e => e.data?.airtableId), deleted: edgeDiff.deleted },
+      })
 
       // Track new airtable IDs for temp node replacement
       const idMap = new Map<string, string>() // tempId → airtableId
@@ -85,7 +106,11 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(fields),
         })
-        if (!res.ok) throw new Error('Failed to create node')
+        if (!res.ok) {
+          const body = await res.text()
+          console.error('[MindMap] create node failed:', res.status, body, { nodeId: node.id, fields: Object.keys(fields) })
+          throw new Error(`Failed to create node: ${res.status} — ${body}`)
+        }
         const record = await res.json()
         idMap.set(node.id, record.id)
         snapshotRef.current.nodes.set(record.id, JSON.stringify({ pos: { x: node.position.x, y: node.position.y }, data: { ...node.data, airtableId: record.id } }))
@@ -112,7 +137,11 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: node.data.airtableId, ...nodeToAirtableFields(node) }),
         })
-        if (!res.ok) throw new Error('Failed to update node')
+        if (!res.ok) {
+          const body = await res.text()
+          console.error('[MindMap] update node failed:', res.status, body, { airtableId: node.data.airtableId })
+          throw new Error(`Failed to update node: ${res.status} — ${body}`)
+        }
         snapshotRef.current.nodes.set(node.data.airtableId!, JSON.stringify({ pos: node.position, data: node.data }))
       }
 
@@ -139,7 +168,11 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(fields),
         })
-        if (!res.ok) throw new Error('Failed to create edge')
+        if (!res.ok) {
+          const body = await res.text()
+          console.error('[MindMap] create edge failed:', res.status, body, { edgeId: edge.id, source: resolved.source, target: resolved.target })
+          throw new Error(`Failed to create edge: ${res.status} — ${body}`)
+        }
         const record = await res.json()
         snapshotRef.current.edges.set(record.id, JSON.stringify({ source: resolved.source, target: resolved.target, label: resolved.label, data: { ...resolved.data, airtableId: record.id } }))
         // Update edge with real airtable ID
@@ -153,7 +186,11 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: edge.data!.airtableId, label: edge.label ?? null, Style: edge.data?.style ?? null, Colour: edge.data?.colour ?? null }),
         })
-        if (!res.ok) throw new Error('Failed to update edge')
+        if (!res.ok) {
+          const body = await res.text()
+          console.error('[MindMap] update edge failed:', res.status, body, { airtableId: edge.data?.airtableId })
+          throw new Error(`Failed to update edge: ${res.status} — ${body}`)
+        }
         snapshotRef.current.edges.set(edge.data!.airtableId!, JSON.stringify({ source: edge.source, target: edge.target, label: edge.label, data: edge.data }))
       }
 
@@ -165,26 +202,54 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
 
       setSaveState('saved')
       setTimeout(() => setSaveState('clean'), 2000)
-    } catch {
+    } catch (err) {
+      console.error('[MindMap] performSave failed:', err)
       setSaveState('error')
+    } finally {
+      savingRef.current = false
+      if (pendingRef.current) {
+        pendingRef.current = false
+        debounceRef.current = setTimeout(() => doSaveCallbackRef.current(), 100)
+      }
     }
   }, [tripId, setNodes, setEdges])
 
   const doSave = useCallback(() => {
-    setNodes(currentNodes => {
-      setEdges(currentEdges => {
-        performSave(currentNodes, currentEdges)
-        return currentEdges
-      })
-      return currentNodes
-    })
-  }, [setNodes, setEdges, performSave])
+    if (savingRef.current) {
+      pendingRef.current = true
+      return
+    }
+    // Read from refs — always current, and avoids setNodes(cb) which React
+    // Strict Mode calls twice (causing duplicate API calls).
+    savingRef.current = true
+    performSave(nodesRef.current, edgesRef.current)
+  }, [performSave])
 
-  const triggerSave = useCallback(() => {
+  const triggerSave = useCallback((reason?: string) => {
+    if (!readyToSaveRef.current) return
+    console.log('[MindMap] triggerSave:', reason ?? 'unknown')
     setSaveState('saving')
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(doSave, 500)
   }, [doSave])
+
+  // Keep doSaveCallbackRef current so the pending-save re-trigger always calls
+  // the latest version of doSave (avoids stale closure in the finally block).
+  useEffect(() => {
+    doSaveCallbackRef.current = doSave
+  }, [doSave])
+
+  // Block saves during React Flow's initial mount/fitView cycle (fires position
+  // changes with dragging=false that look "meaningful" but aren't user actions).
+  useEffect(() => {
+    const t = setTimeout(() => { readyToSaveRef.current = true }, 800)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Keep refs in sync with state so doSave can read current nodes/edges
+  // without using setNodes(cb), which React Strict Mode calls twice.
+  useLayoutEffect(() => { nodesRef.current = nodes }, [nodes])
+  useLayoutEffect(() => { edgesRef.current = edges }, [edges])
 
   // ── Node creation via TypePicker ───────────────────────────────────────────
 
@@ -208,7 +273,7 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
       setEdges(eds => [...eds, newEdge])
     }
     setSelectedNodeId(id)
-    triggerSave()
+    triggerSave('createNode')
   }, [setNodes, setEdges, triggerSave])
 
   // ── Right-click on canvas ──────────────────────────────────────────────────
@@ -271,49 +336,61 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
       markerEnd: { type: MarkerType.ArrowClosed, color: '#2dd4bf' },
     }
     setEdges(eds => addEdge(newEdge, eds))
-    triggerSave()
+    triggerSave('onConnect')
   }, [setEdges, triggerSave])
 
   // ── Changes with auto-save ─────────────────────────────────────────────────
 
   const handleNodesChange: OnNodesChange<MindMapNode> = useCallback((changes) => {
     onNodesChange(changes)
-    const meaningful = changes.some(c => c.type !== 'select' && c.type !== 'dimensions')
-    if (meaningful) triggerSave()
+    const meaningful = changes.some(c => {
+      if (c.type === 'select' || c.type === 'dimensions') return false
+      // Skip in-flight drag position updates — onNodeDragStop fires when drag ends
+      if (c.type === 'position' && 'dragging' in c && c.dragging) return false
+      return true
+    })
+    if (meaningful) triggerSave('nodesChange')
   }, [onNodesChange, triggerSave])
 
   const handleEdgesChange: OnEdgesChange<MindMapEdge> = useCallback((changes) => {
     onEdgesChange(changes)
-    triggerSave()
+    const meaningful = changes.some(c => c.type !== 'select')
+    if (meaningful) triggerSave('edgesChange')
   }, [onEdgesChange, triggerSave])
 
   // ── Node data update (from panel) ──────────────────────────────────────────
 
   const onUpdateNodeData = useCallback((nodeId: string, partial: Partial<MindMapNodeData>) => {
     setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...partial } } : n))
-    triggerSave()
+    triggerSave('updateNodeData')
   }, [setNodes, triggerSave])
 
   // ── Edge update (from popover) ─────────────────────────────────────────────
 
   const onUpdateEdge = useCallback((edgeId: string, label: string, data: EdgeData) => {
     setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, label, data } : e))
-    triggerSave()
+    triggerSave('updateEdge')
   }, [setEdges, triggerSave])
+
+  // ── Node drag end ──────────────────────────────────────────────────────────
+
+  const onNodeDragStop = useCallback(() => {
+    triggerSave('dragStop')
+  }, [triggerSave])
 
   // ── Delete node ────────────────────────────────────────────────────────────
 
   const onDeleteNode = useCallback((nodeId: string) => {
     setNodes(nds => nds.filter(n => n.id !== nodeId))
     setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId))
-    triggerSave()
+    triggerSave('deleteNode')
   }, [setNodes, setEdges, triggerSave])
 
   // ── Delete edge ────────────────────────────────────────────────────────────
 
   const onDeleteEdge = useCallback((edgeId: string) => {
     setEdges(eds => eds.filter(e => e.id !== edgeId))
-    triggerSave()
+    triggerSave('deleteEdge')
   }, [setEdges, triggerSave])
 
   const selectedNode = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) ?? null : null
@@ -332,6 +409,7 @@ export default function MindMapCanvas({ tripId, initialNodes, initialEdges }: Mi
           onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           onPaneContextMenu={onPaneContextMenu}
+          onNodeDragStop={onNodeDragStop}
           deleteKeyCode={['Backspace', 'Delete']}
           fitView
           className="bg-[#0a0f14]"

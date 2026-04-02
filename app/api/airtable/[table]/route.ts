@@ -49,6 +49,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(records)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
+    console.error(`[GET /api/airtable/${table}]`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -63,11 +64,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   try {
     const fields = await req.json()
+    console.log(`[POST /api/airtable/${table}] fields:`, Object.keys(fields))
     const record = await createRecord(table, fields)
     return NextResponse.json(record, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
-    console.error(`[POST /api/airtable/${table}]`, err)
+    console.error(`[POST /api/airtable/${table}] FAILED:`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -89,11 +91,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         { status: 400 }
       )
     }
+    console.log(`[PATCH /api/airtable/${table}] id=${id}, fields:`, Object.keys(fields))
     const record = await updateRecord(table, id, fields)
     return NextResponse.json(record)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
-    console.error(`[PATCH /api/airtable/${table}]`, err)
+    console.error(`[PATCH /api/airtable/${table}] FAILED:`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -118,6 +121,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json(result)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
+    console.error(`[DELETE /api/airtable/${table}]`, err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

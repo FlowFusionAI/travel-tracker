@@ -85,8 +85,14 @@ export default function NodeEditPanel({ node, onUpdate, onDelete, onClose, tripI
         `/api/airtable/upload?recordId=${node.data.airtableId}&table=Mind%20Map%20Nodes&field=images`,
         { method: 'POST', body: formData }
       )
-      if (!res.ok) throw new Error('Upload failed')
+      if (!res.ok) {
+        const body = await res.text()
+        console.error('[NodeEditPanel] image upload failed:', res.status, body, { airtableId: node.data.airtableId })
+        throw new Error(`Upload failed: ${res.status} — ${body}`)
+      }
       // Images are read via /api/images on next load — trigger refetch by re-selecting node
+    } catch (err) {
+      console.error('[NodeEditPanel] handleImageFile error:', err)
     } finally {
       setUploadingImage(false)
     }
